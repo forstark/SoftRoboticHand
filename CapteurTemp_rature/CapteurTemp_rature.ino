@@ -3,12 +3,14 @@
 // Define to which pin of the Arduino the output of the TMP36 is connected:
 #define sensorPin A0
 
-void setup() {
+void setup()
+{
   // Begin serial communication at a baud rate of 9600:
   Serial.begin(9600);
 }
 
-void loop() {
+void loop()
+{
   // Get a reading from the temperature sensor:
   int reading = analogRead(sensorPin);
 
