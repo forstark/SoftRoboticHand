@@ -1,17 +1,20 @@
-class CapteurFlex{ //extension d'une classe mère capteur
-    private:
+#define FLEX1 A0
+#define FLEX2 A1
+
+class CapteurFlex{
+  private:
     int pin;
     int tension;
     int pos;
     int calib0;
     int calib180;
   public:
-    Capteur(int value);  // Constructeur
+    CapteurFlex(int value);  // Constructeur
     void setup(); // Initialisation du capteur
     void calibrage(); //Fonction de calibrage
     int vlrAngle(); //Fonction qui retourne un angle à partir d'une tension
     void lectureTension(); //Lecture de la tension 
-}
+};
 
 //Constructuer du capteur de flexion
 CapteurFlex::CapteurFlex(int value){ 
@@ -36,7 +39,7 @@ void CapteurFlex::calibrage(){
 //Lit la valeur de la tension
 void CapteurFlex::lectureTension(){
   tension = analogRead(pin);
-  pos = vlrAngle(tension, calib180, calib0);
+  pos = vlrAngle();
   delay(500);
 }
 
@@ -48,8 +51,8 @@ int CapteurFlex::vlrAngle(){
 }
 
 //Déclarations
-Capteur flex1(A0);
-Capteur flex2(A1);
+CapteurFlex flex1(FLEX1);
+CapteurFlex flex2(FLEX2);
 
 void setup() {
   Serial.begin(9600);
