@@ -1,18 +1,14 @@
 #include <Wire.h>
-#include <Adafruit_TMP117.h>
-#include <Adafruit_Sensor.h>
-
-Adafruit_TMP117  tmp117;
-
-
+//#include <Adafruit_TMP117.h>
+//#include <Adafruit_Sensor.h>
+//Adafruit_TMP117  tmp117;
 
 //---------------------CLASSES CAPTEURS----------------------------
-
 class CapteurFlex{
   private:
     int tension;
     int pos;
-    int calib0;
+    int calib90;
     int calib180;
     int pin;
     int regAddr; //adresse du registre dans laquelle est stockee la valeur
@@ -52,19 +48,20 @@ class CapteurTemp{
 };
 
 //---------------------CLASS DOIGTS--------------------------------
-
 class Doigt{
   private:
     CapteurFlex flex;
     CapteurPressure pressure1;
     CapteurPressure pressure2;
     CapteurTemp temp1;
-    CapteurTemp temp2;   
+    CapteurTemp temp2; 
+    String nom;  
   public:
-    Doigt(CapteurFlex f1, CapteurPressure p1, CapteurPressure p2, CapteurTemp t1, CapteurTemp t2);
+    Doigt(CapteurFlex f1, CapteurPressure p1, CapteurPressure p2, CapteurTemp t1, CapteurTemp t2, String mot);
     void setUp();  
     void lectureTension();
 };
+
 //---------------------------CONSTRUCTEURS-----------------------------
 
 //Constructeur du capteur de flexion
@@ -72,7 +69,7 @@ CapteurFlex::CapteurFlex(int value){
   pin = value;
   tension = 0;
   pos = 0;
-  calib0 = 0;
+  calib90 = 0;
   calib180 = 0;
 }
 
@@ -88,12 +85,13 @@ CapteurTemp::CapteurTemp(int value){
   readingSensor = 0;
 }
 
-Doigt::Doigt(CapteurFlex f1, CapteurPressure p1, CapteurPressure p2, CapteurTemp t1, CapteurTemp t2){
+Doigt::Doigt(CapteurFlex f1, CapteurPressure p1, CapteurPressure p2, CapteurTemp t1, CapteurTemp t2, String mot){
   flex = f1;
   pressure1 = p1;
   pressure2 = p2;
   temp1 = t1;
   temp2 = t2;
+  nom = mot;
 }
 
 
@@ -115,22 +113,27 @@ void Doigt::setUp() {
   pressure2.setUp();
   temp1.setUp();
   temp2.setUp();
+  Serial.print("Commencement du calibrage pour le ");
+  Serial.println(nom);
+  flex.calibrage();
 }
 
 //---------------------FONCTION CALIBRATION CAPTEURS FLEXION------------
 
 //Fonction de calibrage du capteur de flexion
 void CapteurFlex::calibrage(){
-  Serial.print("Calibrage 180 : ");
-  delay(1000);
-  calib180 = analogRead(pin); 
+  Serial.print("Calibrage pour 180 : ");
   delay(2000);
+  calib180 = analogRead(pin);
   Serial.println(calib180);
-  Serial.print("Calibrage 0 : ");
+  Serial.println("Fin calibrage pour 180"); 
   delay(1000);
-  calib0 = analogRead(pin); 
+  Serial.print("Calibrage pour 0 : ");
   delay(2000);
-  Serial.println(calib0);
+  calib90 = analogRead(pin); 
+  Serial.println(calib90); 
+  Serial.println("Fin calibrage pour 90"); 
+  delay(1000);
 }
 
 
@@ -139,8 +142,8 @@ void CapteurFlex::calibrage(){
 //Permet de calculer l'angle en fonction de la tension reçue
 int CapteurFlex::vlrAngle(){ 
   if(tension < calib180) return 180; //Si la tension est supérieure à celle obtenue lors du calibrage
-  else if(tension > calib0) return 0; //Si la tension est inférieure à celle obtenue lors du calibrage
-  else return map(tension, calib0, calib180, 0, 180); //Calcul de l'angle en fonction des paramètres initiaux                                       
+  else if(tension > calib90) return 90; //Si la tension est inférieure à celle obtenue lors du calibrage
+  else return map(tension, calib90, calib180, 90, 180); //Calcul de l'angle en fonction des paramètres initiaux                                       
 }
 
 //----------------------FONCTIONS LIT LES VALEURS-----------------------
@@ -149,7 +152,7 @@ int CapteurFlex::vlrAngle(){
 void CapteurFlex::lectureTension(){
   tension = analogRead(pin);
   pos = vlrAngle();
-  Serial.print(tension);
+  Serial.print(pos);
 }
 
 //Lit la valeur en bit du capteur de pression
@@ -160,27 +163,29 @@ void CapteurPressure::lecturePressure(){
 
 //Lit la valeur en degre du capteur de temperature
 void CapteurTemp::lectureTemp(){
-  sensors_event_t temp; // create an empty event to be filled
+  /*sensors_event_t temp; // create an empty event to be filled
   tmp117.getEvent(&temp);
   Serial.print(temp.temperature);
   Serial.print(" \xC2\xB0"); // shows degree symbol
-  Serial.print("C");
+  Serial.print("C");*/
 }
 
 
 void Doigt::lectureTension(){
-  Serial.println("\t\tCapteurFlex\t\t\t\tCapteurPressure\t\t\t\t\t\t\t\t\tCapteurTemp");
-  Serial.print("|\t");
+  Serial.print("\n\t\t\t\t");
+  Serial.println(nom);
+  Serial.println("CapteurFlex\t\tCapteurPressure\t\tCapteurTemp");
+  Serial.print("\t");
   flex.lectureTension();
-  Serial.print("\t|\t");
+  Serial.print("\t\t");
   pressure1.lecturePressure();
   Serial.print("\t|\t");
   pressure2.lecturePressure();
+  /*Serial.print("\t\t");
+  temp1.lectureTemp();
   Serial.print("\t|\t");
-  /*temp1.lectureTemp();
-  Serial.print("\t|\t");
-  temp2.lectureTemp();
-  Serial.println("\t|\t");*/
+  temp2.lectureTemp();*/
+  Serial.println();
   delay(500);
 }
 
@@ -201,8 +206,8 @@ CapteurTemp temp2(A7);
 CapteurTemp temp3(A8);
 CapteurTemp temp4(A9);
 
-Doigt pouce(flex1, pressure1, pressure2, temp1, temp2);
-Doigt index(flex2, pressure3, pressure4, temp3, temp4);
+Doigt pouce(flex1, pressure1, pressure2, temp1, temp2, "POUCE");
+Doigt index(flex2, pressure3, pressure4, temp3, temp4, "INDEX");
 
 void setup() {
   Serial.begin(115200);
