@@ -59,7 +59,18 @@ class Doigt{
   public:
     Doigt(CapteurFlex f1, CapteurPressure p1, CapteurPressure p2, CapteurTemp t1, CapteurTemp t2, String mot);
     void setUp();  
-    void lectureTension();
+    void lecture();
+};
+
+//---------------------CLASS DOIGTS--------------------------------
+class Main{
+  private:
+    const int nb = 2;
+    Doigt doigts[];
+  public:
+    Main(Doigt d1, Doigt d2);
+    void setUp();  
+    void lecture();
 };
 
 //---------------------------CONSTRUCTEURS-----------------------------
@@ -85,6 +96,7 @@ CapteurTemp::CapteurTemp(int value){
   readingSensor = 0;
 }
 
+//Constructeur de de la classe doigt
 Doigt::Doigt(CapteurFlex f1, CapteurPressure p1, CapteurPressure p2, CapteurTemp t1, CapteurTemp t2, String mot){
   flex = f1;
   pressure1 = p1;
@@ -94,6 +106,11 @@ Doigt::Doigt(CapteurFlex f1, CapteurPressure p1, CapteurPressure p2, CapteurTemp
   nom = mot;
 }
 
+//Constructeur de la classe Main
+Main::Main(Doigt d1, Doigt d2){
+  doigts[0] = d1;
+  doigts[1] = d2;
+}
 
 //----------------------FONCTIONS SETUP----------------------------------
 
@@ -106,7 +123,7 @@ void CapteurPressure::setUp(){ pinMode(pinPressure, INPUT);}
 //Initialisation du capteur de temperature
 void CapteurTemp::setUp(){ pinMode(pinSensor, INPUT);}
 
-
+//Initialisation d'un doigt
 void Doigt::setUp() {
   flex.setUp();
   pressure1.setUp();
@@ -118,6 +135,11 @@ void Doigt::setUp() {
   flex.calibrage();
 }
 
+//Initialisation de la main
+void Main::setUp() {
+  for(int i=0; i < nb; i++) doigts[i].setUp();
+}
+
 //---------------------FONCTION CALIBRATION CAPTEURS FLEXION------------
 
 //Fonction de calibrage du capteur de flexion
@@ -126,13 +148,11 @@ void CapteurFlex::calibrage(){
   delay(2000);
   calib180 = analogRead(pin);
   Serial.println(calib180);
-  Serial.println("Fin calibrage pour 180"); 
   delay(1000);
-  Serial.print("Calibrage pour 0 : ");
+  Serial.print("Calibrage pour 90 : ");
   delay(2000);
   calib90 = analogRead(pin); 
   Serial.println(calib90); 
-  Serial.println("Fin calibrage pour 90"); 
   delay(1000);
 }
 
@@ -171,7 +191,7 @@ void CapteurTemp::lectureTemp(){
 }
 
 
-void Doigt::lectureTension(){
+void Doigt::lecture(){
   Serial.print("\n\t\t\t\t");
   Serial.println(nom);
   Serial.println("CapteurFlex\t\tCapteurPressure\t\tCapteurTemp");
@@ -189,6 +209,9 @@ void Doigt::lectureTension(){
   delay(500);
 }
 
+void Main::lecture(){
+  for(int i=0; i < nb; i++) doigts[i].lecture();
+}
 //----------------------DECLARATIONS DES CAPTEURS----------------------
 //Déclarations capteurs flex
 CapteurFlex flex1(A0);
@@ -208,14 +231,13 @@ CapteurTemp temp4(A9);
 
 Doigt pouce(flex1, pressure1, pressure2, temp1, temp2, "POUCE");
 Doigt index(flex2, pressure3, pressure4, temp3, temp4, "INDEX");
+Main lionne(pouce, index);
 
 void setup() {
   Serial.begin(115200);
-  pouce.setUp();
-  index.setUp();
+  lionne.setUp();
 }
 
 void loop() {
-  pouce.lectureTension();
-  index.lectureTension();
+  lionne.lecture();
 }
