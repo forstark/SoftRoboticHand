@@ -1,11 +1,13 @@
 //--------------------------------------------------------------------------------------------dans la .h----------------------------------------------------------------------------------//
 
-//#include <Wire.h>
-//#include <Adafruit_TMP117.h>
-//#include <Adafruit_Sensor.h>
-//Adafruit_TMP117  tmp117;
+#include "Wire.h"
+#include "Adafruit_TMP117.h"
+#include "Adafruit_Sensor.h"
+
 #include "stm32l1xx_hal.h"
 #include "math.h"
+
+Adafruit_TMP117  tmp117;
 
 //---------------------CLASSES CAPTEURS----------------------------
 class CapteurFlex{
@@ -164,9 +166,6 @@ void CapteurPressure::lecturePressure(){
 void CapteurTemp::lectureTemp(){
   /*sensors_event_t temp; // create an empty event to be filled
   tmp117.getEvent(&temp);
-  Serial.print(temp.temperature);
-  Serial.print(" \xC2\xB0"); // shows degree symbol
-  Serial.print("C");*/
 }
 
 
