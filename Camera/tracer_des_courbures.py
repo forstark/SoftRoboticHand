@@ -7,10 +7,10 @@ Created on Wed Apr 14 17:49:20 2021
 
 import matplotlib.pyplot as plt
 import numpy as np
-import xlrd
 from numpy import linalg as LA
 import cmath
 import math
+
 
 
 '''workbook = xlrd.open_workbook('Profil.xlsx')
@@ -356,7 +356,7 @@ plt.show()
 
 '''Finger material and geometry properties (in USI)'''
 E   = 0.36e6
-courbure = K
+courbure = 10*K
 
 '''Finger 1'''
 #Finger Geometry (in USI)
